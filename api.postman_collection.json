@@ -1,0 +1,38 @@
+{
+	"info": {
+		"_postman_id": "c35252db-bf63-4ff0-89f7-0d12110e43a8",
+		"name": "api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "comparison api",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"params\":[\r\n        {\r\n            \"type\":\"Dental Floss\",\r\n            \"unit\":5\r\n        },\r\n        {\r\n            \"type\":\"Ibuprofen\",\r\n            \"unit\":12\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/comparison",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"comparison"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
