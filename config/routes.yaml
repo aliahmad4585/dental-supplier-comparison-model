@@ -5,3 +5,8 @@ controllers:
 kernel:
     resource: ../src/Kernel.php
     type: annotation
+
+api_comparison:
+    path:       /api/comparison
+    controller: App\Controller\ComparisonController::comparison
+    methods:    POST
