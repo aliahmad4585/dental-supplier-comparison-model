@@ -36,5 +36,11 @@ api url http://localhost:8000/api/comparison
         }
     ]
 }
-
+# output format
+{
+    "data": {
+        "Supplier": "supplierB",
+        "price": 102
+    }
+}
 
