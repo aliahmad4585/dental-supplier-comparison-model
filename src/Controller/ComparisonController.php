@@ -21,12 +21,8 @@ class ComparisonController extends AbstractController
      */
 
     #[Route('/api/comparison', name: 'api_comparison')]
-    public function comparison(
-        Request $request,
-        ComparisonRequestValidator $validator,
-        ComparisonService $comparisonService
-    ): JsonResponse {
-
+    public function comparison(Request $request, ComparisonRequestValidator $validator, ComparisonService $comparisonService): JsonResponse
+    {
         $payload =  $request->toArray();
         $errors = $validator->validate($payload);
 
@@ -35,6 +31,6 @@ class ComparisonController extends AbstractController
         }
 
         $cheaperSupplier = $comparisonService->getCheaperSupplier($payload);
-        return $this->json(["response" => $cheaperSupplier]);
+        return $this->json(["data" => $cheaperSupplier]);
     }
 }

@@ -6,7 +6,7 @@ class ComparisonService
 {
 
     /**
-     * Get all suppliers with price based on user input
+     * Get cheaper supplier
      * 
      * @param array $payload
      * 
@@ -20,14 +20,17 @@ class ComparisonService
 
         /**
          * iterate the every product entered by user
-         * get the supplier with price for each product 
+         * get the supplier with price for each product enter by user
          */
         foreach ($payloadParams as $value) {
+            /** get the products which match the criteria enter by user*/
             $type = $value['type'];
             $unit = $value['unit'];
             $end =  count($products);
             $start = 0;
             $filterProducts = $this->filterProducts($products, $type, $unit, array(), $start, $end);
+
+            /** calculate the price of each product group by supplier */
             $start =  count($filterProducts) - 1;
             $end = 0;
             $price = 0;
@@ -36,13 +39,13 @@ class ComparisonService
             $suppliers = $this->sumSupplierPrices($supplierWithPrice, $suppliers);
         }
 
-        /** Sort the suppliers array asceding and first supplier treated as cheap supplier */
+        /** Sort the suppliers in asceding order and first supplier treated as cheap supplier */
         if (count($suppliers)) {
             asort($suppliers);
             $supplierName = array_key_first($suppliers);
-            $value = $suppliers[$supplierName];
+            $price = $suppliers[$supplierName];
 
-            return $supplierName . ' is cheaper - ' . $value . ' value';
+            return ["Supplier" => $supplierName, "price" => $price];
         }
 
         return $suppliers;
@@ -51,7 +54,7 @@ class ComparisonService
 
     /** 
      * sum values of all suppliers
-     * every supplier has value against with each product
+     * every supplier has price against each product
      * if user search with multiple products then add price of each product
      * to every supplier after calculation
      * 
@@ -73,11 +76,12 @@ class ComparisonService
     }
 
     /**
-     *  Calculate the price of each product by each cutomer
+     *  Calculate the price of each product by each supplier
      *  will return the supplier with price
+     * 
      *  ################# Logic #########################
-     *   1. Divid the unit enter by user with product unit
-     *   2. get absolute quotient and mulitply the quotient with single product price
+     *   1. Divid the unit enter by user with individual product unit
+     *   2. get absolute quotient and multiply the quotient with single product price
      *   3. add the price which gets in above step in total price
      *   4. decrease the unit by using this formula ($unit - ($productUnit * $absQuotient))
      * 
@@ -93,17 +97,8 @@ class ComparisonService
      * @return array $supplierArr
      * 
      */
-    private function calculatePrice(
-        array $filterProducts,
-        array $supplierArr,
-        string $supplier,
-        int $start,
-        int $end,
-        int $unit,
-        int $unChangedUnit,
-        int $price
-    ) {
-
+    private function calculatePrice(array $filterProducts, array $supplierArr, string $supplier, int $start, int $end, int $unit, int $unChangedUnit, int $price): array
+    {
         // recursion termination condition
         if ($start == $end - 1) {
             $supplierArr[$supplier] = $price;
@@ -125,6 +120,7 @@ class ComparisonService
         }
 
         $start = $start - 1;
+
         /** if the supplier changed then reset the values */
         if (isset($filterProducts[$start]) && $filterProducts[$start]['supplier'] != $supplier) {
             $supplierArr[$supplier] = $price;
@@ -160,14 +156,8 @@ class ComparisonService
      * 
      * */
 
-    private function filterProducts(
-        array $products,
-        string $productType,
-        int $unit,
-        array $filteredProducts,
-        int $start,
-        int $end
-    ): array {
+    private function filterProducts(array $products, string $productType, int $unit, array $filteredProducts, int $start, int $end): array
+    {
 
         if ($start >= $end) {
             return $filteredProducts;

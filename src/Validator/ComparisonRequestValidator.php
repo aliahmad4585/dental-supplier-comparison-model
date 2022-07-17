@@ -31,7 +31,7 @@ class ComparisonRequestValidator
 
           $errors =  [];
 
-          if (!count($payload) && !count($payload['params'])) {
+          if (!count($payload) || !count($payload['params'])) {
                $errors['params'] =  "payload must have key name 'params' with atleast one entry ";
                return $errors;
           }
@@ -42,7 +42,7 @@ class ComparisonRequestValidator
                     break;
                }
                if (!in_array($value['type'], array_column($this->products, 'type'))) {
-                    $errors['type'] = "type doesn't exist";
+                    $errors['type'] = "product type doesn't exist";
                     break;
                }
                if (!isset($value['unit']) || empty($value['unit']) || $value['unit'] <= 0) {
