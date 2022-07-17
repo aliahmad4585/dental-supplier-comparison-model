@@ -181,15 +181,15 @@ class ComparisonService
     public function getLoadedProducts(): array
     {
         $produts = array(
-            array("type" => "Dental Floss", "unit" => 1, "price" => 9, "supplier" => "supplierA"),
-            array("type" => "Dental Floss", "unit" => 20, "price" => 160,  "supplier" => "supplierA"),
-            array("type" => "Ibuprofen", "unit" => 1, "price" => 5,  "supplier" => "supplierA"),
-            array("type" => "Ibuprofen", "unit" => 10, "price" => 48,  "supplier" => "supplierA"),
-            array("type" => "Dental Floss", "unit" => 1, "price" => 8,  "supplier" => "supplierB"),
-            array("type" => "Dental Floss", "unit" => 10, "price" => 71,  "supplier" => "supplierB"),
-            array("type" => "Ibuprofen", "unit" => 1, "price" => 6,  "supplier" => "supplierB"),
-            array("type" => "Ibuprofen", "unit" => 5, "price" => 25,  "supplier" => "supplierB"),
-            array("type" => "Ibuprofen", "unit" => 100, "price" => 410,  "supplier" => "supplierB"),
+            array("type" => "Dental Floss", "unit" => 1, "price" => 9, "supplier" => "supplier A"),
+            array("type" => "Dental Floss", "unit" => 20, "price" => 160,  "supplier" => "supplier A"),
+            array("type" => "Ibuprofen", "unit" => 1, "price" => 5,  "supplier" => "supplier A"),
+            array("type" => "Ibuprofen", "unit" => 10, "price" => 48,  "supplier" => "supplier A"),
+            array("type" => "Dental Floss", "unit" => 1, "price" => 8,  "supplier" => "supplier B"),
+            array("type" => "Dental Floss", "unit" => 10, "price" => 71,  "supplier" => "supplier B"),
+            array("type" => "Ibuprofen", "unit" => 1, "price" => 6,  "supplier" => "supplier B"),
+            array("type" => "Ibuprofen", "unit" => 5, "price" => 25,  "supplier" => "supplier B"),
+            array("type" => "Ibuprofen", "unit" => 100, "price" => 410,  "supplier" => "supplier B"),
         );
 
         return $produts;

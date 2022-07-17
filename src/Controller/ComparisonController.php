@@ -31,6 +31,6 @@ class ComparisonController extends AbstractController
         }
 
         $cheaperSupplier = $comparisonService->getCheaperSupplier($payload);
-        return $this->json(["data" => $cheaperSupplier]);
+        return $this->json(["Result" => $cheaperSupplier]);
     }
 }
