@@ -8,6 +8,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Service\ComparisonService;
 use Symfony\Component\HttpFoundation\Request;
 use App\Validator\ComparisonRequestValidator;
+use App\Exception\ComparisonServiceException;
 
 class ComparisonController extends AbstractController
 {
@@ -23,14 +24,17 @@ class ComparisonController extends AbstractController
     #[Route('/api/comparison', name: 'api_comparison')]
     public function comparison(Request $request, ComparisonRequestValidator $validator, ComparisonService $comparisonService): JsonResponse
     {
-        $payload =  $request->toArray();
-        $errors = $validator->validate($payload);
+        try {
+            $payload =  $request->toArray();
+            $errors = $validator->validate($payload);
+            if (count($errors)) {
+                return $this->json($errors);
+            }
 
-        if (count($errors)) {
-            return $this->json($errors);
+            $cheaperSupplier = $comparisonService->getCheaperSupplier($payload);
+            return $this->json(["Result" => $cheaperSupplier]);
+        } catch ( ComparisonServiceException | \Throwable $th) {
+            return $this->json(["error" => $th->getMessage()]);
         }
-
-        $cheaperSupplier = $comparisonService->getCheaperSupplier($payload);
-        return $this->json(["Result" => $cheaperSupplier]);
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Service;
 
+use App\Exception\ComparisonServiceException;
+
 class ComparisonService
 {
 
@@ -14,41 +16,45 @@ class ComparisonService
      */
     public function getCheaperSupplier(array $payload): array | string
     {
-        $payloadParams =  $payload['params'];
-        $products  = $this->getLoadedProducts();
-        $suppliers = [];
+        try {
+            $payloadParams =  $payload['params'];
+            $products  = $this->getLoadedProducts();
+            $suppliers = [];
 
-        /**
-         * iterate the every product entered by user
-         * get the supplier with price for each product enter by user
-         */
-        foreach ($payloadParams as $value) {
-            /** get the products which match the criteria enter by user*/
-            $type = $value['type'];
-            $unit = $value['unit'];
-            $end =  count($products);
-            $start = 0;
-            $filterProducts = $this->filterProducts($products, $type, $unit, array(), $start, $end);
+            /**
+             * iterate the every product entered by user
+             * get the supplier with price for each product enter by user
+             */
+            foreach ($payloadParams as $value) {
+                /** get the products which match the criteria enter by user*/
+                $type = $value['type'];
+                $unit = $value['unit'];
+                $end =  count($products);
+                $start = 0;
+                $filterProducts = $this->filterProducts($products, $type, $unit, array(), $start, $end);
 
-            /** calculate the price of each product group by supplier */
-            $start =  count($filterProducts) - 1;
-            $end = 0;
-            $price = 0;
-            $lastSupplier = $filterProducts[$start]['supplier'];
-            $supplierWithPrice = $this->calculatePrice($filterProducts, array(), $lastSupplier, $start, $end, $unit, $unit, $price);
-            $suppliers = $this->sumSupplierPrices($supplierWithPrice, $suppliers);
+                /** calculate the price of each product group by supplier */
+                $start =  count($filterProducts) - 1;
+                $end = 0;
+                $price = 0;
+                $lastSupplier = $filterProducts[$start]['supplier'];
+                $supplierWithPrice = $this->calculatePrice($filterProducts, array(), $lastSupplier, $start, $end, $unit, $unit, $price);
+                $suppliers = $this->sumSupplierPrices($supplierWithPrice, $suppliers);
+            }
+
+            /** Sort the suppliers in asceding order and first supplier treated as cheap supplier */
+            if (count($suppliers)) {
+                asort($suppliers);
+                $supplierName = array_key_first($suppliers);
+                $price = $suppliers[$supplierName];
+
+                return ["Supplier" => $supplierName, "price" => $price];
+            }
+
+            return $suppliers;
+        } catch (ComparisonServiceException $th) {
+            throw new ComparisonServiceException("Get cheaper supplier exception: " . $th->getMessage());
         }
-
-        /** Sort the suppliers in asceding order and first supplier treated as cheap supplier */
-        if (count($suppliers)) {
-            asort($suppliers);
-            $supplierName = array_key_first($suppliers);
-            $price = $suppliers[$supplierName];
-
-            return ["Supplier" => $supplierName, "price" => $price];
-        }
-
-        return $suppliers;
     }
 
 
@@ -99,38 +105,43 @@ class ComparisonService
      */
     private function calculatePrice(array $filterProducts, array $supplierArr, string $supplier, int $start, int $end, int $unit, int $unChangedUnit, int $price): array
     {
-        // recursion termination condition
-        if ($start == $end - 1) {
-            $supplierArr[$supplier] = $price;
-            return $supplierArr;
+        try {
+            // recursion termination condition
+            if ($start == $end - 1) {
+                $supplierArr[$supplier] = $price;
+                return $supplierArr;
+            }
+
+            if ($filterProducts[$start]['supplier'] == $supplier) {
+
+                $productUnit = $filterProducts[$start]['unit'];
+
+                $quotient =  $unit / $productUnit;
+                $quotientArr = explode('.', $quotient);
+                $absQuotient = (int) $quotientArr[0];
+
+                $productPrice =  $filterProducts[$start]['price'];
+                $productPrice = $absQuotient * $productPrice;
+                $price = $price + $productPrice;
+                $unit = $unit - ($productUnit * $absQuotient);
+            }
+
+            $start = $start - 1;
+
+            /** if the supplier changed then reset the values */
+            if (isset($filterProducts[$start]) && $filterProducts[$start]['supplier'] != $supplier) {
+                $supplierArr[$supplier] = $price;
+                $unit =  $unChangedUnit;
+                $price = 0;
+                $supplier =  $filterProducts[$start]['supplier'];
+            }
+
+            $price =  $this->calculatePrice($filterProducts, $supplierArr, $supplier, $start, $end, $unit, $unChangedUnit, $price);
+            return $price;
+            //code...
+        } catch (ComparisonServiceException $th) {
+            throw new ComparisonServiceException("Calculate price exception: " . $th->getMessage());
         }
-
-        if ($filterProducts[$start]['supplier'] == $supplier) {
-
-            $productUnit = $filterProducts[$start]['unit'];
-
-            $quotient =  $unit / $productUnit;
-            $quotientArr = explode('.', $quotient);
-            $absQuotient = (int) $quotientArr[0];
-
-            $productPrice =  $filterProducts[$start]['price'];
-            $productPrice = $absQuotient * $productPrice;
-            $price = $price + $productPrice;
-            $unit = $unit - ($productUnit * $absQuotient);
-        }
-
-        $start = $start - 1;
-
-        /** if the supplier changed then reset the values */
-        if (isset($filterProducts[$start]) && $filterProducts[$start]['supplier'] != $supplier) {
-            $supplierArr[$supplier] = $price;
-            $unit =  $unChangedUnit;
-            $price = 0;
-            $supplier =  $filterProducts[$start]['supplier'];
-        }
-
-        $price =  $this->calculatePrice($filterProducts, $supplierArr, $supplier, $start, $end, $unit, $unChangedUnit, $price);
-        return $price;
     }
 
 
@@ -159,18 +170,23 @@ class ComparisonService
     private function filterProducts(array $products, string $productType, int $unit, array $filteredProducts, int $start, int $end): array
     {
 
-        if ($start >= $end) {
+        try {
+
+            if ($start >= $end) {
+                return $filteredProducts;
+            }
+
+            if ($products[$start]['type'] == $productType && $products[$start]['unit'] <= $unit) {
+                array_push($filteredProducts, $products[$start]);
+            }
+
+            $start =  $start + 1;
+            $filteredProducts = $this->filterProducts($products, $productType, $unit, $filteredProducts, $start, $end);
+
             return $filteredProducts;
+        } catch (ComparisonServiceException $th) {
+            throw new ComparisonServiceException("Filter product exception: " . $th->getMessage());
         }
-
-        if ($products[$start]['type'] == $productType && $products[$start]['unit'] <= $unit) {
-            array_push($filteredProducts, $products[$start]);
-        }
-
-        $start =  $start + 1;
-        $filteredProducts = $this->filterProducts($products, $productType, $unit, $filteredProducts, $start, $end);
-
-        return $filteredProducts;
     }
 
     /**
