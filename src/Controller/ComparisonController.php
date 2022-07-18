@@ -32,7 +32,7 @@ class ComparisonController extends AbstractController
             }
 
             $cheaperSupplier = $comparisonService->getCheaperSupplier($payload);
-            return $this->json(["Result" => $cheaperSupplier]);
+            return $this->json(["result" => $cheaperSupplier]);
         } catch ( ComparisonServiceException | \Throwable $th) {
             return $this->json(["error" => $th->getMessage()]);
         }
