@@ -38,7 +38,7 @@ api url http://localhost:8000/api/comparison
 }
 # output format
 {
-    "Result": {
+    "result": {
         "Supplier": "supplier B",
         "price": 102
     }
